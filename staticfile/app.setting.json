@@ -1,0 +1,6 @@
+{
+    "S3AccessKeyId": "AKIAJ7BWQJCRJFSGJ7HQ",
+    "S3SecretAccessKey": "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",
+    "S3Bucket":"aws-s3-learning-lax",
+    "S3FolderName":""
+}

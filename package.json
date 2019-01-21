@@ -1,0 +1,27 @@
+{
+  "name": "node_express_api_aws_s3",
+  "version": "1.0.0",
+  "description": "AWS s3 concept with express api",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Laxmikant04/node_express_api_aws_s3.git"
+  },
+  "author": "Laxmikant",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Laxmikant04/node_express_api_aws_s3/issues"
+  },
+  "homepage": "https://github.com/Laxmikant04/node_express_api_aws_s3#readme",
+  "dependencies": {
+    "aws-sdk": "^2.388.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "csv-parse": "^4.3.0",
+    "express": "^4.16.4",
+    "request": "^2.88.0"
+  }
+}
