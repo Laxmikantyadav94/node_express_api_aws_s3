@@ -5,6 +5,60 @@ var s3= require('../Database/awsS3.js');
 var appSetting = require('../staticfile/app.setting.json');
 
 const controller ={
+    listS3Buckets:function(){
+        return new Promise(function(resolve,reject){
+            // Call S3 to list current buckets
+            s3.listBuckets(function(err, data) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data.Buckets);
+                }
+            });
+        })
+    },
+    createS3Bucket:function(bucketName){
+        return new Promise(function(resolve,reject){           
+            // Create the parameters for calling createBucket
+            var bucketParams = {
+                Bucket : bucketName
+            }; 
+            // Call S3 to create the bucket
+            s3.createBucket(bucketParams, function(err, data) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data.Location);
+                }
+            });
+        })
+    },
+    createS3SubFolder:function(){
+        return new Promise(function(resolve,reject){           
+            let params = {
+                Bucket: appSetting.S3Bucket+"/folder", 
+                Key: "subfolder/", 
+                Body:''
+            };
+            //upload can also be used in place of putObject
+            s3.putObject(params,function(err,data){
+                if(err) return reject(err);
+                resolve(data);
+            });
+        })
+    },
+    checkS3SubFolderExist:function(){
+        return new Promise(function(resolve,reject){           
+            let params = {
+                Bucket: appSetting.S3Bucket+"/folder", 
+                Key: "subfolderr/"
+            };
+            s3.headObject(params,function(err,data){
+                if(err) return reject(err);
+                resolve(data);
+            });
+        })
+    },
     readCsvAsStream: async function(keyName)   {
 
       return new Promise(function(resolve,reject){  
@@ -17,7 +71,6 @@ const controller ={
             Key: keyName
         }
         
-
         //Fetch or read data from aws s3
         s3.getObject(getParams).createReadStream().pipe(parser)
             .on('data', function(csvrow) {
@@ -66,6 +119,26 @@ const controller ={
           });
         });  
     },
+    saveFilesToS3SubFolder:function(data,logName){
+        return new Promise(function(resolve,reject){  
+          var currentDate= new Date();
+          var fileName=logName+"_"+currentDate.toJSON()+".json"
+          const params = {
+            Bucket: appSetting.S3Bucket+"/folder/subfolder", // pass your bucket name
+            Key: fileName, 
+            Body: JSON.stringify(data)
+            };
+            s3.upload(params, function(s3Err, data) {
+                if (s3Err) reject(s3Err);
+                var resultObj={
+                  "bucket":appSetting.S3Bucket,
+                  "key":appSetting.S3FolderName+fileName,
+                  "location":data.Location
+                }
+                resolve(resultObj);
+            });
+          });  
+      },
     readJsonFromS3 : function(keyName){
         return new Promise(function(resolve,reject){  
                 var getParams = {
@@ -79,7 +152,40 @@ const controller ={
                     resolve(json);
                 }) 
         })  
-    }
+    },
+    getObjectsFromBucket:function(){
+        return new Promise(function(resolve,reject){
+            // Create the parameters for calling createBucket
+            var bucketParams = {
+                Bucket : appSetting.S3Bucket
+            };                    
+                                                
+            // Call S3 to create the bucket
+            s3.listObjects(bucketParams, function(err, data) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        })  
+    },
+    deleteS3Bucket:function(bucketName){
+        return new Promise(function(resolve,reject){           
+            // Create the parameters for calling createBucket
+            var bucketParams = {
+                Bucket : bucketName
+            }; 
+            // Call S3 to create the bucket
+            s3.deleteBucket(bucketParams, function(err, data) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data.Location);
+                }
+            });
+        })
+    } 
 }
 
 module.exports=controller;
