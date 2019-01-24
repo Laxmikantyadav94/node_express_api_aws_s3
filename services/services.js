@@ -39,6 +39,53 @@ const services ={
             }            
         }
     },
+    getS3BucketCors:async function(req,res,next){
+        try{
+            let respObj =await controller.getS3BucketCors(req.params.bucketname);
+            res.status(200).json(respObj);
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    setS3BucketCors:async function(req,res,next){
+        try{
+            // Create initial parameters JSON for putBucketCors
+            var thisConfig = {
+                AllowedHeaders:["Authorization"],
+                AllowedMethods:[],
+                AllowedOrigins:["*"],
+                ExposeHeaders:[],
+                MaxAgeSeconds:3000
+            };
+            // Create array of allowed methods parameter based on parameters
+            var allowedMethods = [];
+            req.body.allowedMethods.forEach(val => {
+                if (val.toUpperCase() === "POST") {allowedMethods.push("POST")};
+                if (val.toUpperCase() === "GET") {allowedMethods.push("GET")};
+                if (val.toUpperCase() === "PUT") {allowedMethods.push("PUT")};
+                if (val.toUpperCase() === "PATCH") {allowedMethods.push("PATCH")};
+                if (val.toUpperCase() === "DELETE") {allowedMethods.push("DELETE")};
+                if (val.toUpperCase() === "HEAD") {allowedMethods.push("HEAD")};
+            });
+
+            // create CORS params
+            thisConfig.AllowedMethods = allowedMethods;
+            var corsRules = new Array(thisConfig);
+
+            let respObj =await controller.setS3BucketCors(req.body.bucketname,corsRules);
+            res.status(200).json(respObj);
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    getS3BucketAcl:async function(req,res,next){
+        try{
+            let respObj =await controller.getS3BucketAcl(req.params.bucketname);
+            res.status(200).json(respObj);
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
     saveFilesToS3 : async function(req,res,next){
         try{
             let respObj = await controller.saveFilesToS3(req.body.data,req.body.fileName);

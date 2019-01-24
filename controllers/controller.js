@@ -33,6 +33,58 @@ const controller ={
             });
         })
     },
+    getS3BucketCors:function(bucketName){
+        return new Promise(function(resolve,reject){           
+            // Create the parameters 
+            var bucketParams = {
+                Bucket : bucketName
+            }; 
+            // call S3 to retrieve CORS configuration for selected bucket
+            s3.getBucketCors(bucketParams, function(err, data) {
+                if (err) {
+                    reject(err)
+                } else if (data) {
+                    resolve(data.CORSRules);
+                }
+            });
+           
+        })
+    },
+    setS3BucketCors:function(bucketName,corsRules){
+        return new Promise(function(resolve,reject){           
+            // Create the parameters 
+            var params = {
+                Bucket : bucketName,
+                CORSConfiguration: {CORSRules: corsRules}
+            }; 
+            // call S3 to retrieve CORS configuration for selected bucket
+            s3.putBucketCors(params, function(err, data) {
+                if (err) {
+                    reject(err)
+                } else if (data) {
+                    resolve(data);
+                }
+            });
+           
+        })
+    },
+    getS3BucketAcl:function(bucketName){
+        return new Promise(function(resolve,reject){           
+            // Create the parameters 
+            var bucketParams = {
+                Bucket : bucketName
+            }; 
+            // call S3 to retrieve CORS configuration for selected bucket
+            s3.getBucketAcl(bucketParams, function(err, data) {
+                if (err) {
+                    reject(err)
+                } else if (data) {
+                    resolve(data.Grants);
+                }
+            });
+           
+        })
+    },
     createS3SubFolder:function(){
         return new Promise(function(resolve,reject){           
             let params = {
