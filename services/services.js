@@ -94,6 +94,38 @@ const services ={
             res.status(500).json(err);
         }
     },
+    createFileWithPublicReadAcl :async function(req,res,next){
+        try{
+            let resp =await controller.createFileWithPublicReadAcl(req.body.data,req.body.fileName);
+            res.status(200).json(resp);
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    getBucketPolicy:async function(req,res,next){
+        try{
+            let resp= await controller.getBucketPolicy();
+            res.status(200).json(resp)
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    setReadOnlyAnonUserBucketPolicy: async function(req,res,next){
+        try{
+            let resp= await controller.setReadOnlyAnonUserBucketPolicy();
+            res.status(200).json(resp)
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    deleteBucketPolicy: async function(req,res,next){
+        try{
+            let resp= await controller.deleteBucketPolicy();
+            res.status(200).json(resp)
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
     saveFilesToS3SubFolder:async function(req,res,next){
         try{
             let respObj = await controller.saveFilesToS3SubFolder(req.body.data,req.body.fileName);

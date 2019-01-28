@@ -21,7 +21,7 @@ const controller ={
         return new Promise(function(resolve,reject){           
             // Create the parameters for calling createBucket
             var bucketParams = {
-                Bucket : bucketName
+                Bucket : appSetting.S3Bucket
             }; 
             // Call S3 to create the bucket
             s3.createBucket(bucketParams, function(err, data) {
@@ -170,6 +170,82 @@ const controller ={
               resolve(resultObj);
           });
         });  
+    },
+    createFileWithPublicReadAcl :function(data,fileName){
+        return new Promise(function(resolve,reject){  
+            let params={
+                Bucket:appSetting.S3Bucket,
+                Key:fileName,
+                Body:JSON.stringify(data),
+                ACL:'public-read'
+            }
+            //to set public-read your bucket's public access setting should allow this
+
+            //look -https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl for more canned Acl options
+            s3.upload(params,function(err,data){
+                if(err) reject(err);
+                resolve(data);
+            })
+        })
+    },
+    getBucketPolicy : function(){
+        return new Promise(function(resolve,reject){
+            let params={
+                Bucket:appSetting.S3Bucket
+            }
+            s3.getBucketPolicy(params,function(err,data){
+                if(err) reject(err);
+                resolve(data);
+            })
+        })
+    },
+    setReadOnlyAnonUserBucketPolicy:function(){
+        return new Promise(function(resolve,reject){
+            let bucket=appSetting.S3Bucket;
+            var readOnlyAnonUserPolicy = {
+                Version: "2012-10-17",
+                Statement: [
+                  {
+                    Sid: "AddPerm",
+                    Effect: "Allow",
+                    Principal: "*",
+                    Action: [
+                      "s3:GetObject"
+                    ],
+                    Resource: [
+                      ""
+                    ]
+                  }
+                ]
+              };
+              
+              // create selected bucket resource string for bucket policy
+              var bucketResource = "arn:aws:s3:::" + bucket + "/*";
+              readOnlyAnonUserPolicy.Statement[0].Resource[0] = bucketResource;
+              
+              // convert policy JSON into string and assign into params
+              var bucketPolicyParams = {Bucket: bucket,
+                 Policy: JSON.stringify(readOnlyAnonUserPolicy)
+                };
+                
+                //to set buckey policy your bucket's public access setting should allow this
+            s3.putBucketPolicy(bucketPolicyParams,function(err,data){
+                if(err) reject(err)
+                resolve(data)
+            })
+        });
+    },
+    deleteBucketPolicy:function(){
+        return new Promise(function(resolve,reject){ 
+            var bucketPolicyParams = {
+                Bucket: appSetting.S3Bucket
+               };
+               
+           s3.deleteBucketPolicy(bucketPolicyParams,function(err,data){
+               if(err) reject(err)
+               resolve(data)
+           })
+        })
     },
     saveFilesToS3SubFolder:function(data,logName){
         return new Promise(function(resolve,reject){  
