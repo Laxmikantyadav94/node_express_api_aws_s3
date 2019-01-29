@@ -171,6 +171,123 @@ const controller ={
           });
         });  
     },
+    readFileFromS3:function(keyName){
+        return new Promise(function(resolve,reject){
+            let params={
+                Bucket:appSetting.S3Bucket,
+                Key:keyName
+            }
+    
+            s3.getObject(params,function(err,data){
+                if(err) reject(err);
+                let objectData = data.Body.toString('utf-8'); // Use the encoding necessary
+                resolve(objectData);
+            })       
+
+        })
+    },
+    getsignedUrlForObject: function(keyName){
+        return new Promise(function(resolve,reject){
+            let params={
+                Bucket:appSetting.S3Bucket,
+                Key:keyName
+            }
+            s3.getSignedUrl('getObject',params,function(err,data){
+                resolve(data)
+            })
+        })
+    },
+    uploadMultipart:function(req){
+        return new Promise(function(resolve,reject){           
+            
+            var startTime = new Date();
+            
+            var partSize = 1024 * 1024 * 5; // 5mb chunks except last part
+            var numPartsLeft = Math.ceil(buffer.length / partSize);
+            var maxUploadTries = 3;         
+                        
+            var multipartMap = {
+                Parts: []
+            };
+            controller.initiateMuntipart();
+        })       
+
+    },
+
+    initiateMuntipart:function(req){  
+
+            var file = req.files.file;
+            var buffer = fs.readFileSync(file.path);
+            var partNum = 0;
+            var multipartParams = {
+                Bucket: appSetting.S3Bucket,
+                Key: file.name,
+                ContentType: file.type
+            };
+            console.log('Creating multipart upload for:', file.name);
+            s3.createMultipartUpload(multipartParams, function(mpErr, multipart) {
+              if (mpErr) return console.error('Error!', mpErr);
+              console.log('Got upload ID', multipart.UploadId);
+          
+              for (var start = 0; start < buffer.length; start += partSize) {
+                partNum++;
+                var end = Math.min(start + partSize, buffer.length);
+                var partParams = {
+                  Body: buffer.slice(start, end),
+                  Bucket: multipartParams.Bucket,
+                  Key: multipartParams.Key,
+                  PartNumber: String(partNum),
+                  UploadId: multipart.UploadId
+                };
+          
+                console.log('Uploading part: #', partParams.PartNumber, ', Start:', start);
+                controller.uploadPart(multipart, partParams);
+              }
+        })
+    },
+    completeMultipartUpload:function (s3, doneParams) {
+        s3.completeMultipartUpload(doneParams, function(err, data) {
+          if (err) return console.error('An error occurred while completing multipart upload');
+          var delta = (new Date() - startTime) / 1000;
+          console.log('Completed upload in', delta, 'seconds');
+          console.log('Final upload data:', data);
+        });
+      },
+    uploadPart:function (multipart, partParams, tryNum) {
+        var tryNum = tryNum || 1;
+        s3.uploadPart(partParams, function(multiErr, mData) {
+          console.log('started');
+          if (multiErr) {
+            console.log('Upload part error:', multiErr);
+    
+            if (tryNum < maxUploadTries) {
+              console.log('Retrying upload of part: #', partParams.PartNumber);
+              uploadPart(s3, multipart, partParams, tryNum + 1);
+            } else {
+              console.log('Failed uploading part: #', partParams.PartNumber);
+            }
+            // return;
+          }
+    
+          multipartMap.Parts[this.request.params.PartNumber - 1] = {
+            ETag: mData.ETag,
+            PartNumber: Number(this.request.params.PartNumber)
+          };
+          console.log('Completed part', this.request.params.PartNumber);
+          console.log('mData', mData);
+          if (--numPartsLeft > 0) return; // complete only when all parts uploaded
+    
+          var doneParams = {
+            Bucket: multipartParams.Bucket,
+            Key: multipartParams.Key,
+            MultipartUpload: multipartMap,
+            UploadId: multipart.UploadId
+          };
+    
+          console.log('Completing upload...');
+          completeMultipartUpload(s3, doneParams);
+        })
+    },
     createFileWithPublicReadAcl :function(data,fileName){
         return new Promise(function(resolve,reject){  
             let params={
@@ -267,18 +384,14 @@ const controller ={
             });
           });  
       },
-    readJsonFromS3 : function(keyName){
+      downloadFileFromS3 : function(keyName){
         return new Promise(function(resolve,reject){  
                 var getParams = {
                     Bucket: appSetting.S3Bucket,
                     Key: keyName
                 }
 
-                s3.getObject(getParams,function(err,data){
-                    if(err) reject(err);
-                    var json = JSON.parse(new Buffer(data.Body).toString("utf8"));
-                    resolve(json);
-                }) 
+               resolve(s3.getObject(getParams).createReadStream());
         })  
     },
     getObjectsFromBucket:function(){

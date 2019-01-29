@@ -94,6 +94,24 @@ const services ={
             res.status(500).json(err);
         }
     },
+    readFileFromS3:async function(req,res,next){
+        try{
+            let respObj = await controller.readFileFromS3(req.params.keyname);
+            res.status(200).json(respObj);
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    //work pending
+    muntipartUpload: async function(req,res,next){
+        try{
+            
+            let respObj = await controller.uploadMultipart(req);
+            res.status(200).json(respObj);
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
     createFileWithPublicReadAcl :async function(req,res,next){
         try{
             let resp =await controller.createFileWithPublicReadAcl(req.body.data,req.body.fileName);
@@ -134,10 +152,12 @@ const services ={
             res.status(500).json(err);
         }
     },
-    readJsonFromS3 :async function(req,res,next){
+    downloadFileFromS3 :async function(req,res,next){
         try{
-            let data = await controller.readJsonFromS3(req.params.keyname);
-            res.status(200).json(data);
+            let fileStream = await controller.downloadFileFromS3(req.params.keyname);
+            res.attachment(req.params.keyname);
+            fileStream.pipe(res);
+            res.status(200);
         }catch(err){
             res.status(500).json(err);
         }
@@ -147,6 +167,15 @@ const services ={
             let data = await controller.readCsvAsStream(req.params.keyname);
             res.status(200).json(data);
         }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    getsignedUrlForObject:async function(req,res,next){
+        try{
+            let resp = await controller.getsignedUrlForObject(req.params.keyname);
+            res.status(200).json(resp);
+        }catch(err){
+            console.log(err);
             res.status(500).json(err);
         }
     },
