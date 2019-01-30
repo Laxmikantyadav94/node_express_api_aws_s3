@@ -11,7 +11,6 @@ router.get('/gets3bucketcors/:bucketname',services.getS3BucketCors);
 router.post('/sets3bucketcors',services.setS3BucketCors);
 router.get('/gets3bucketacl/:bucketname',services.getS3BucketAcl);
 router.post('/savefilestos3',services.saveFilesToS3);
-router.post('/muntipartupload',services.muntipartUpload);
 router.post('/createfilewithpublicreadacl',services.createFileWithPublicReadAcl);
 router.get('/getbucketpolicy',services.getBucketPolicy);
 router.get('/setreadonlyanonuserbucketpolicy',services.setReadOnlyAnonUserBucketPolicy);
@@ -22,6 +21,7 @@ router.get('/downloadfilefroms3/:keyname',services.downloadFileFromS3);
 router.get('/readcsvasstream/:keyname',services.readCsvAsStream);
 router.get('/getsignedurlforobject/:keyname',services.getsignedUrlForObject);
 router.get('/listobjectsfrombucket',services.getObjectsFromBucket);
+router.get('/s3sqlselect/:keyname',services.s3sqlselect);
 router.delete('/deletes3bucket/:bucketname',services.deleteS3Bucket);
 
 module.exports = router

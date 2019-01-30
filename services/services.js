@@ -102,16 +102,6 @@ const services ={
             res.status(500).json(err);
         }
     },
-    //work pending
-    muntipartUpload: async function(req,res,next){
-        try{
-            
-            let respObj = await controller.uploadMultipart(req);
-            res.status(200).json(respObj);
-        }catch(err){
-            res.status(500).json(err);
-        }
-    },
     createFileWithPublicReadAcl :async function(req,res,next){
         try{
             let resp =await controller.createFileWithPublicReadAcl(req.body.data,req.body.fileName);
@@ -183,6 +173,14 @@ const services ={
         try{
             let data = await controller.getObjectsFromBucket();
             res.status(200).json(data);
+        }catch(err){
+            res.status(500).json(err);
+        }
+    },
+    s3sqlselect:async function(req,res,next){
+        try{
+            let resp=await controller.s3sqlselect(req.params.keyname);
+            res.status(200).json(resp);
         }catch(err){
             res.status(500).json(err);
         }
