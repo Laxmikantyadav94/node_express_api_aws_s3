@@ -20,7 +20,7 @@
     "aws-sdk": "^2.388.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
-    "csv-parse": "^4.3.0",
+    "csv-parse": "^4.4.6",
     "express": "^4.16.4",
     "request": "^2.88.0"
   }
