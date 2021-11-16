@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/Laxmikant04/node_express_api_aws_s3#readme",
   "dependencies": {
-    "aws-sdk": "^2.388.0",
+    "aws-sdk": "^2.814.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "csv-parse": "^4.3.0",
